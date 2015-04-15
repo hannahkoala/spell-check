@@ -1,42 +1,55 @@
-words = File.readlines("./input.txt")
+class Word
+  def initialize(file)
+    @lines = File.readlines(file)
+    @case_count = @lines[0].to_i
+    @lines = @lines.drop(2)
+    group_words
+  end
 
-def compare(mis, op1, op2)
-  misspelled_word = mis.split(//)
-  option_1 = op1.split(//)
-  option_2 = op2.split(//)
-  op1_match = 0
-  op1_misses = 0
-  op2_match = 0
-  op2_misses = 0
-
-  misspelled_word.each do |l|
-    option_1.each do |j|
-      if l == j
-        op1_match += 1
-      else
-        op2_misses += 1
-      end
-    end
-    option_2.each do |i|
-      if l == i
-        op2_match += 1
-      else
-        op2_misses += 1
-      end
-    end
-
-    if (op1_match - op1_misses) > (op2_match - op2_misses)
-      return op1
-    else
-      return op2
+  def group_words
+    @case_count.times do |i|
+      @words = []
+      @index = i * 4
+      @words = @lines[@index]
+      @candidates = @lines[@index + 1..@lines.length]
+      compare(@words, @candidates)
     end
   end
 
+  def compare(word, candidate)
+    best_match = nil
+    best_score = 0
+    candidate.each do |c|
+      score = test_candidate(word, candidate)
+      if score > best_score
+        best_score = score
+        best_match = c
+      end
+    end
+    puts best_match
+  end
+
+  def test_candidate(word, candidate)
+    candidate_score = 0
+
+    word.each_char do |word_l|
+      candidate.each do |cand|
+        cand.each_char do |cand_l|
+          if cand_l == word_l
+            candidate_score += 1
+          end
+        end
+      end
+    end
+    candidate_score
+  end
 
 end
 
-39.times do |i|
-  if words[i].length > 2 && words[i.next].length > 2 && words[i.next.next].length > 2
-    puts compare(words[i], words[i.next], words[i.next.next])
-  end
+puts "Enter the location of the next file you would like to test, or enter 'examp' for default example:"
+input = gets.to_s.chomp
+if input == "examp"
+  Word.new("./input.txt")
+else
+  Word.new(input)
 end
